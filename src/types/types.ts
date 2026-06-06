@@ -60,7 +60,7 @@ export interface TrafficInfo {
 
 export interface RainInfo {
   condition: boolean;
-  level: string;
+  level: number;
   pct: number;
   msg: string;
 }
@@ -76,7 +76,7 @@ export interface ExtractedSchedule {
   trafficJamSpot: string;
   trafficJamMsg: string;
   rain: boolean;
-  rainLevel: string;
+  rainLevel: number;
   rainPct: number;
   weatherMsg: string;
 }

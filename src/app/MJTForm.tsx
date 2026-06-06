@@ -6,9 +6,10 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { getRouteAndShelter, getSchedule } from "@/http/api";
 import { useSchedule } from "@/utils/store";
 import responseExtractor from "@/utils/responseExtractor";
+import Loader from "./Loader";
 
 export default function MJTForm() {
-  const { data } = useQuery({
+  const { data, isFetching } = useQuery({
     queryKey: ["shelters"],
     queryFn: async () => {
       const responseData = await getRouteAndShelter();
@@ -39,9 +40,10 @@ export default function MJTForm() {
 
       return { routes, shelters };
     },
+    staleTime: Infinity,
   });
 
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationKey: ["schedule"],
     mutationFn: getSchedule,
   });
@@ -75,6 +77,7 @@ export default function MJTForm() {
 
   return (
     <section className="p-6 rounded-lg border border-blue-400">
+      {(isFetching || isPending) && <Loader />}
       <form onSubmit={onSubmit} className="space-y-4">
         <div id="route-section" className="space-y-1.5">
           <label htmlFor="routes" className="inline-block">
@@ -163,7 +166,7 @@ export default function MJTForm() {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div id="date-section" className="flex flex-col gap-1.5">
-            <label htmlFor="date">Tanggal</label>
+            <label htmlFor="date">Tanggal Pergi</label>
             <input
               id="date"
               type="date"
@@ -172,7 +175,7 @@ export default function MJTForm() {
             />
           </div>
           <div id="time-section" className="flex flex-col gap-1.5">
-            <label htmlFor="time">Waktu</label>
+            <label htmlFor="time">Waktu Berangkat</label>
             <input
               id="time"
               type="time"

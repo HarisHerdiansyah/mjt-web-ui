@@ -63,21 +63,19 @@ function weatherMsgBasedOnWeather(detail: DetailPerjalanan): string {
 }
 
 function extractRainInformation(details: DetailPerjalanan[]): RainInfo {
-  const info: RainInfo = { condition: false, level: "", pct: 0.0, msg: "" };
+  const info: RainInfo = { condition: false, level: 0, pct: 0.0, msg: "" };
 
   for (const detail of details) {
     const wL = weatherLevel(detail.kondisi_cuaca);
     if (wL > 0) {
       info.condition = true;
-      info.level = detail.kondisi_cuaca;
+      info.level = wL;
       info.pct = detail.probabilitas_hujan_persen;
       info.msg = weatherMsgBasedOnWeather(detail);
       return info;
     }
   }
 
-  info.level = WEATHER_LEVEL.CERAH;
-  info.pct = 0.0;
   info.msg = "Cuaca cerah / berawan selama perjalanan.";
   return info;
 }
