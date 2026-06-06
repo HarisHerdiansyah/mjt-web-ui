@@ -1,6 +1,12 @@
+import type { ExtractedSchedule } from "@/types/types";
 import { create } from "zustand";
 
-export const useSchedule = create((set) => ({
+type ScheduleState = {
+  schedules: ExtractedSchedule[];
+  storeSchedules: (newSchedules: ExtractedSchedule[]) => void;
+};
+
+export const useSchedule = create<ScheduleState>((set) => ({
   schedules: [],
-  storeSchedules: (newSchedules: any) => set({ schedules: newSchedules }),
+  storeSchedules: (newSchedules) => set({ schedules: newSchedules }),
 }));
