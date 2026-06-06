@@ -1,65 +1,149 @@
-import Image from "next/image";
+import { FaPersonShelter } from "react-icons/fa6";
+import { IoMdCheckmarkCircle } from "react-icons/io";
+import { IoPaperPlane, IoBus } from "react-icons/io5";
+
+function MJTForm() {
+  return (
+    <section className="p-6 rounded-lg border border-blue-400">
+      <form action="" className="space-y-4">
+        <div id="route-section" className="space-y-1.5">
+          <label className="inline-block">Pilih Rute MJT</label>
+          <div className="flex gap-2 items-center">
+            <div className="w-9 h-9 rounded-md bg-blue-600 flex items-center justify-center">
+              <IoPaperPlane className="text-white" size={24} />
+            </div>
+            <select
+              name=""
+              id=""
+              className="p-2 rounded-md border-b border-blue-600 outline-0 focus:outline-1 focus:outline-blue-300 w-full"
+            >
+              <option value="">Jatinangor - Dipatiukur</option>
+              <option value="">Dipatiukur - Jatinangor</option>
+            </select>
+          </div>
+        </div>
+        <div id="origin-shelter-section" className="space-y-1.5">
+          <label className="inline-block">Halte Awal</label>
+          <div className="flex gap-2 items-center">
+            <div className="w-9 h-9 rounded-md bg-white flex items-center justify-center">
+              <IoBus className="text-blue-600" size={32} />
+            </div>
+            <select
+              name=""
+              id=""
+              className="p-2 rounded-full border border-blue-600 outline-0 focus:outline-1 focus:outline-blue-300 w-full"
+            >
+              <option value="">Jatinangor - Dipatiukur</option>
+              <option value="">Dipatiukur - Jatinangor</option>
+            </select>
+          </div>
+        </div>
+        <div id="toward-shelter-section" className="space-y-1.5">
+          <label className="inline-block">Halte Akhir</label>
+          <div className="flex gap-2 items-center">
+            <div className="w-9 h-9 rounded-md bg-white flex items-center justify-center">
+              <IoBus className="text-blue-600" size={32} />
+            </div>
+            <select
+              name=""
+              id=""
+              className="p-2 rounded-full border border-blue-600 outline-0 focus:outline-1 focus:outline-blue-300 w-full"
+            >
+              <option value="">Jatinangor - Dipatiukur</option>
+              <option value="">Dipatiukur - Jatinangor</option>
+            </select>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div id="date-section" className="flex flex-col gap-1.5">
+            <label>Tanggal</label>
+            <input
+              type="date"
+              className="p-2 rounded-full border border-blue-600 outline-0 focus:outline-1 focus:outline-blue-300"
+            />
+          </div>
+          <div id="time-section" className="flex flex-col gap-1.5">
+            <label>Waktu</label>
+            <input
+              type="time"
+              className="p-2 rounded-full border border-blue-600 outline-0 focus:outline-1 focus:outline-blue-300"
+            />
+          </div>
+        </div>
+      </form>
+    </section>
+  );
+}
+
+function TripInfo() {
+  return (
+    <div className="space-y-2">
+      <div className="px-2 py-1 rounded-lg border-3 border-amber-400 bg-amber-200">
+        <p>Misal ada tulisan di sini</p>
+      </div>
+      <div className="px-2 py-1 rounded-lg border-3 border-green-500 bg-green-200">
+        <p>Misal ada tulisan di sini</p>
+      </div>
+      <div className="px-2 py-1 rounded-lg border-3 border-blue-500 bg-blue-200">
+        <p>Misal ada tulisan di sini</p>
+      </div>
+    </div>
+  );
+}
+
+function TripCard() {
+  return (
+    <div className="rounded-xl p-1.5 bg-blue-600 overflow-hidden">
+      <div className="flex gap-1 items-center mb-2">
+        <IoMdCheckmarkCircle className="text-white" size={20} />
+        <p className="text-white">Prediksi</p>
+      </div>
+      <div className="w-full bg-white rounded-xl p-5 space-y-4">
+        <div className="grid grid-cols-2 gap-6">
+          <div className="flex flex-col gap-1">
+            <p>Halte Awal</p>
+            <div className="flex items-center gap-3">
+              <IoBus className="text-blue-600" size={32} />
+              <p className="border-b border-blue-600 w-full">10.45 AM</p>
+            </div>
+          </div>
+          <div className="flex flex-col gap-1">
+            <p>Halte Awal</p>
+            <div className="flex items-center gap-3">
+              <IoBus className="text-blue-600" size={32} />
+              <p className="border-b border-blue-600 w-full">10.45 AM</p>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <FaPersonShelter className="text-blue-600" size={32} />
+          <div className="flex flex-col w-full">
+            <span className="text-sm">
+              Saran berada di Halte Awal paling lambat pada:
+            </span>
+            <p className="border-b border-blue-600 w-full font-semibold">
+              10.45 AM
+            </p>
+          </div>
+        </div>
+        <TripInfo />
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen w-screen bg-slate-100 font-poppins">
+      <div className="mx-auto h-full max-w-lg bg-white">
+        <nav className="py-4 px-6 border-b border-slate-300">
+          <h1>Brand Name</h1>
+        </nav>
+        <div className="p-6 overflow-hidden space-y-6">
+          <MJTForm />
+          <TripCard />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }
