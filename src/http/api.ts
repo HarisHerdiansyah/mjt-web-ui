@@ -8,7 +8,7 @@ import axios from "axios";
 
 export async function getRouteAndShelter() {
   try {
-    const response = await axios.get("/shelters/K5");
+    const response = await axios.get("/api/shelters/K5");
     if (response.status !== 200) {
       throw new Error("Failed to fetch shelters");
     }
@@ -21,7 +21,7 @@ export async function getRouteAndShelter() {
 
 export async function getSchedule(payload: any) {
   try {
-    const response = await axios.post("/schedule", payload);
+    const response = await axios.post("/api/schedule", payload);
     if (response.status !== 200) {
       throw new Error("Failed to fetch schedule");
     }
