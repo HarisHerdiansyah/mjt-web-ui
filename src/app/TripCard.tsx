@@ -62,7 +62,7 @@ export default function TripCard() {
             <div className="flex items-center gap-3">
               <FaRegClock className="text-blue-600" size={32} />
               <p className="border-b border-blue-600 w-full">
-                {sch.timeAtArrive}
+                {sch.timeAtDepart}
               </p>
             </div>
           </div>
