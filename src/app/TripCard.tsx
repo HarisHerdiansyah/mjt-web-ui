@@ -69,14 +69,14 @@ export default function TripCard() {
         </div>
         <div className="grid grid-cols-2 gap-6">
           <div className="flex flex-col gap-1">
-            <p>Halte Sampai</p>
+            <p>Halte Tujuan</p>
             <div className="flex items-center gap-2">
               <IoBus className="text-blue-600" size={32} />
               <p className="text-sm">{sch.towardShelter}</p>
             </div>
           </div>
           <div className="flex flex-col gap-1">
-            <p>Waktu Akhir</p>
+            <p>Waktu Sampai</p>
             <div className="flex items-center gap-3">
               <FaRegClock className="text-blue-600" size={32} />
               <p className="border-b border-blue-600 w-full">

@@ -77,6 +77,22 @@ export default function MJTForm() {
   });
   const [dt, setDt] = useState<DateValue | null>(now(getLocalTimeZone()));
 
+  const [routeInput, setRouteInput] = useState("");
+  const [originInput, setOriginInput] = useState("");
+  const [towardInput, setTowardInput] = useState("");
+
+  const allRoutes = data?.routes || [];
+  const shelterList = data?.shelters?.[routeId as string] || [];
+  const filteredRoutes = allRoutes.filter((r: any) =>
+    r.name.toLowerCase().includes(routeInput.toLowerCase()),
+  );
+  const filteredOrigin = shelterList.filter((s: any) =>
+    s.shelter.toLowerCase().includes(originInput.toLowerCase()),
+  );
+  const filteredToward = shelterList.filter((s: any) =>
+    s.shelter.toLowerCase().includes(towardInput.toLowerCase()),
+  );
+
   const getPayloadString = (dateObj: DateValue | null) => {
     if (!dateObj) return "";
     const obj = dateObj as CalendarDateTime;
@@ -95,6 +111,9 @@ export default function MJTForm() {
     setRouteId(null);
     setRouteShelters({ origin: null, toward: null });
     setDt(now(getLocalTimeZone()));
+    setRouteInput("");
+    setOriginInput("");
+    setTowardInput("");
   };
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -124,22 +143,25 @@ export default function MJTForm() {
         <div id="route-section" className="space-y-1.5">
           <Label htmlFor="routes">Pilih Rute MJT</Label>
           <div className="flex gap-2 items-center">
-            <div className="w-9 h-9 rounded-md bg-blue-600 flex items-center justify-center">
+            <div className="w-9 h-9 shrink-0 rounded-md bg-blue-600 flex items-center justify-center">
               <IoPaperPlane className="text-white" size={24} />
             </div>
             <ComboBox
               id="routes"
-              className="w-full"
+              className="flex-1 min-w-0"
               aria-labelledby="routes-label"
               selectedKey={routeId}
+              inputValue={routeInput}
+              onInputChange={setRouteInput}
               onSelectionChange={(key) => {
                 setRouteId(key);
-                setRouteShelters({
-                  origin: null,
-                  toward: null,
-                });
+                setRouteShelters({ origin: null, toward: null });
+                setOriginInput("");
+                setTowardInput("");
+                const selected = allRoutes.find((r: any) => r.id === key);
+                setRouteInput(selected?.name ?? "");
               }}
-              items={data?.routes || []}
+              items={filteredRoutes}
             >
               <ComboBox.InputGroup>
                 <Input placeholder="Pilih Rute" />
@@ -161,21 +183,24 @@ export default function MJTForm() {
         <div id="origin-shelter-section" className="space-y-1.5">
           <Label htmlFor="origin">Halte Awal</Label>
           <div className="flex gap-2 items-center">
-            <div className="w-9 h-9 rounded-md bg-white flex items-center justify-center">
+            <div className="w-9 h-9 shrink-0 rounded-md bg-white flex items-center justify-center">
               <IoBus className="text-blue-600" size={32} />
             </div>
             <ComboBox
               id="origin"
-              className="w-full"
+              className="flex-1 min-w-0"
               aria-labelledby="origin-label"
               selectedKey={routeShelters.origin}
-              onSelectionChange={(key) =>
-                setRouteShelters((prev) => ({
-                  ...prev,
-                  origin: key,
-                }))
-              }
-              items={data?.shelters[routeId as string] || []}
+              inputValue={originInput}
+              onInputChange={setOriginInput}
+              onSelectionChange={(key) => {
+                setRouteShelters((prev) => ({ ...prev, origin: key }));
+                const selected = shelterList.find(
+                  (s: any) => s.shelter.toLowerCase() === key,
+                );
+                setOriginInput(selected?.shelter ?? "");
+              }}
+              items={filteredOrigin}
             >
               <ComboBox.InputGroup>
                 <Input placeholder="Pilih Halte Awal" />
@@ -200,21 +225,24 @@ export default function MJTForm() {
         <div id="toward-shelter-section" className="space-y-1.5">
           <Label htmlFor="toward">Halte Tujuan</Label>
           <div className="flex gap-2 items-center">
-            <div className="w-9 h-9 rounded-md bg-white flex items-center justify-center">
+            <div className="w-9 h-9 shrink-0 rounded-md bg-white flex items-center justify-center">
               <IoBus className="text-blue-600" size={32} />
             </div>
             <ComboBox
               id="toward"
-              className="w-full"
+              className="flex-1 min-w-0"
               aria-labelledby="toward-label"
               selectedKey={routeShelters.toward}
-              onSelectionChange={(key) =>
-                setRouteShelters((prev) => ({
-                  ...prev,
-                  toward: key,
-                }))
-              }
-              items={data?.shelters[routeId as string] || []}
+              inputValue={towardInput}
+              onInputChange={setTowardInput}
+              onSelectionChange={(key) => {
+                setRouteShelters((prev) => ({ ...prev, toward: key }));
+                const selected = shelterList.find(
+                  (s: any) => s.shelter.toLowerCase() === key,
+                );
+                setTowardInput(selected?.shelter ?? "");
+              }}
+              items={filteredToward}
             >
               <ComboBox.InputGroup>
                 <Input placeholder="Pilih Halte Tujuan" />
