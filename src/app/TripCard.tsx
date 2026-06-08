@@ -46,7 +46,7 @@ export default function TripCard() {
     >
       <div className="flex gap-1 items-center mb-2">
         <IoMdCheckmarkCircle className="text-white" size={20} />
-        <p className="text-white">Armada {sch.policeNumber}</p>
+        <p className="text-white">Data Jadwal</p>
       </div>
       <div className="w-full bg-white rounded-xl p-5 space-y-4">
         <div className="grid grid-cols-2 gap-6">

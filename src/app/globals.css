@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@heroui/styles"; 
 
 @theme {
   --font-poppins: var(--font-poppins), sans-serif;

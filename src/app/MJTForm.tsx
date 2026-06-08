@@ -1,7 +1,20 @@
 "use client";
 
+import type { Key } from "@heroui/react";
+import type { DateValue } from "@internationalized/date";
 import { FormEvent, useState } from "react";
 import { IoPaperPlane, IoBus } from "react-icons/io5";
+import {
+  ComboBox,
+  Input,
+  ListBox,
+  Label,
+  Calendar,
+  DateField,
+  DatePicker,
+  TimeField,
+} from "@heroui/react";
+import { getLocalTimeZone, now } from "@internationalized/date";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getRouteAndShelter, getSchedule } from "@/http/api";
 import { useSchedule } from "@/utils/store";
@@ -50,13 +63,19 @@ export default function MJTForm() {
 
   const storeSchedules = useSchedule((state) => state.storeSchedules);
 
-  const [routeId, setRouteId] = useState<string>("");
-  const [routeShelters, setRouteShelters] = useState({
-    origin: "",
-    toward: "",
+  const [routeId, setRouteId] = useState<Key | null>(null);
+  const [routeShelters, setRouteShelters] = useState<{
+    origin: Key | null;
+    toward: Key | null;
+  }>({
+    origin: null,
+    toward: null,
   });
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [datetime, setDatetime] = useState<DateValue | null>(
+    now(getLocalTimeZone()),
+  );
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -80,109 +99,198 @@ export default function MJTForm() {
       {(isFetching || isPending) && <Loader />}
       <form onSubmit={onSubmit} className="space-y-4">
         <div id="route-section" className="space-y-1.5">
-          <label htmlFor="routes" className="inline-block">
-            Pilih Rute MJT
-          </label>
+          <Label htmlFor="routes">Pilih Rute MJT</Label>
           <div className="flex gap-2 items-center">
             <div className="w-9 h-9 rounded-md bg-blue-600 flex items-center justify-center">
               <IoPaperPlane className="text-white" size={24} />
             </div>
-            <select
-              name="routes"
+            <ComboBox
               id="routes"
-              className="p-2 rounded-md border-b border-blue-600 outline-0 focus:outline-1 focus:outline-blue-300 w-full"
-              onChange={(e) => setRouteId(e.target.value)}
+              className="w-full"
+              aria-labelledby="routes-label"
+              selectedKey={routeId}
+              onSelectionChange={(key) => {
+                setRouteId(key);
+                setRouteShelters({
+                  origin: null,
+                  toward: null,
+                });
+              }}
+              items={data?.routes || []}
             >
-              <option value="">-- Pilih --</option>
-              {data?.routes.map((r: any) => (
-                <option key={r.id} value={r.id}>
-                  {r.name}
-                </option>
-              ))}
-            </select>
+              <ComboBox.InputGroup>
+                <Input placeholder="Pilih Rute" />
+                <ComboBox.Trigger />
+              </ComboBox.InputGroup>
+              <ComboBox.Popover>
+                <ListBox>
+                  {(r: any) => (
+                    <ListBox.Item id={r.id} textValue={r.name}>
+                      {r.name}
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                  )}
+                </ListBox>
+              </ComboBox.Popover>
+            </ComboBox>
           </div>
         </div>
         <div id="origin-shelter-section" className="space-y-1.5">
-          <label htmlFor="origin" className="inline-block">
-            Halte Awal
-          </label>
+          <Label htmlFor="origin">Halte Awal</Label>
           <div className="flex gap-2 items-center">
             <div className="w-9 h-9 rounded-md bg-white flex items-center justify-center">
               <IoBus className="text-blue-600" size={32} />
             </div>
-            <select
-              name="origin"
+            <ComboBox
               id="origin"
-              className="p-2 rounded-full border border-blue-600 outline-0 focus:outline-1 focus:outline-blue-300 w-full"
-              onChange={(e) =>
+              className="w-full"
+              aria-labelledby="origin-label"
+              selectedKey={routeShelters.origin}
+              onSelectionChange={(key) =>
                 setRouteShelters((prev) => ({
                   ...prev,
-                  [e.target.id]: e.target.value.toLowerCase(),
+                  origin: key,
                 }))
               }
+              items={data?.shelters[routeId as string] || []}
             >
-              <option value="">-- Pilih --</option>
-              {data?.shelters[routeId]?.map((s: any) => (
-                <option
-                  key={`${s.lat} - ${s.long}`}
-                  value={s.shelter.toLowerCase()}
-                >
-                  {s.shelter}
-                </option>
-              ))}
-            </select>
+              <ComboBox.InputGroup>
+                <Input placeholder="Pilih Halte Awal" />
+                <ComboBox.Trigger />
+              </ComboBox.InputGroup>
+              <ComboBox.Popover>
+                <ListBox>
+                  {(s: any) => (
+                    <ListBox.Item
+                      id={s.shelter.toLowerCase()}
+                      textValue={s.shelter}
+                    >
+                      {s.shelter}
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                  )}
+                </ListBox>
+              </ComboBox.Popover>
+            </ComboBox>
           </div>
         </div>
         <div id="toward-shelter-section" className="space-y-1.5">
-          <label htmlFor="toward" className="inline-block">
-            Halte Akhir
-          </label>
+          <Label htmlFor="toward">Halte Tujuan</Label>
           <div className="flex gap-2 items-center">
             <div className="w-9 h-9 rounded-md bg-white flex items-center justify-center">
               <IoBus className="text-blue-600" size={32} />
             </div>
-            <select
-              name="toward"
+            <ComboBox
               id="toward"
-              className="p-2 rounded-full border border-blue-600 outline-0 focus:outline-1 focus:outline-blue-300 w-full"
-              onChange={(e) =>
+              className="w-full"
+              aria-labelledby="toward-label"
+              selectedKey={routeShelters.toward}
+              onSelectionChange={(key) =>
                 setRouteShelters((prev) => ({
                   ...prev,
-                  [e.target.id]: e.target.value.toLowerCase(),
+                  origin: key,
                 }))
               }
+              items={data?.shelters[routeId as string] || []}
             >
-              <option value="">-- Pilih --</option>
-              {data?.shelters[routeId]?.map((s: any) => (
-                <option
-                  key={`${s.lat} - ${s.long}`}
-                  value={s.shelter.toLowerCase()}
-                >
-                  {s.shelter}
-                </option>
-              ))}
-            </select>
+              <ComboBox.InputGroup>
+                <Input placeholder="Pilih Halte Tujuan" />
+                <ComboBox.Trigger />
+              </ComboBox.InputGroup>
+              <ComboBox.Popover>
+                <ListBox>
+                  {(s: any) => (
+                    <ListBox.Item
+                      id={s.shelter.toLowerCase()}
+                      textValue={s.shelter}
+                    >
+                      {s.shelter}
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                  )}
+                </ListBox>
+              </ComboBox.Popover>
+            </ComboBox>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div id="date-section" className="flex flex-col gap-1.5">
-            <label htmlFor="date">Tanggal Pergi</label>
-            <input
-              id="date"
-              type="date"
-              className="p-2 rounded-full border border-blue-600 outline-0 focus:outline-1 focus:outline-blue-300"
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </div>
-          <div id="time-section" className="flex flex-col gap-1.5">
-            <label htmlFor="time">Waktu Berangkat</label>
-            <input
-              id="time"
-              type="time"
-              className="p-2 rounded-full border border-blue-600 outline-0 focus:outline-1 focus:outline-blue-300"
-              onChange={(e) => setTime(e.target.value)}
-            />
-          </div>
+        <div id="date-section" className="flex flex-col gap-1.5">
+          <Label htmlFor="dateAndTime">Jadwal</Label>
+          <DatePicker
+            id="dateAndTime"
+            hourCycle={24}
+            aria-label="date"
+            granularity="minute"
+            shouldForceLeadingZeros
+            shouldCloseOnSelect={false}
+            value={datetime}
+            onChange={setDatetime}
+            hideTimeZone
+          >
+            {({ state }) => (
+              <>
+                <DateField.Group fullWidth>
+                  <DateField.Input>
+                    {(segment) => <DateField.Segment segment={segment} />}
+                  </DateField.Input>
+                  <DateField.Suffix>
+                    <DatePicker.Trigger>
+                      <DatePicker.TriggerIndicator />
+                    </DatePicker.Trigger>
+                  </DateField.Suffix>
+                </DateField.Group>
+                <DatePicker.Popover className="flex flex-col gap-3">
+                  <Calendar aria-label="Event date">
+                    <Calendar.Header>
+                      <Calendar.YearPickerTrigger>
+                        <Calendar.YearPickerTriggerHeading />
+                        <Calendar.YearPickerTriggerIndicator />
+                      </Calendar.YearPickerTrigger>
+                      <Calendar.NavButton slot="previous" />
+                      <Calendar.NavButton slot="next" />
+                    </Calendar.Header>
+                    <Calendar.Grid>
+                      <Calendar.GridHeader>
+                        {(day) => (
+                          <Calendar.HeaderCell>{day}</Calendar.HeaderCell>
+                        )}
+                      </Calendar.GridHeader>
+                      <Calendar.GridBody>
+                        {(date) => <Calendar.Cell date={date} />}
+                      </Calendar.GridBody>
+                    </Calendar.Grid>
+                    <Calendar.YearPickerGrid>
+                      <Calendar.YearPickerGridBody>
+                        {({ year }) => <Calendar.YearPickerCell year={year} />}
+                      </Calendar.YearPickerGridBody>
+                    </Calendar.YearPickerGrid>
+                  </Calendar>
+                  <div className="flex items-center justify-between">
+                    <Label>Waktu di tujuan:</Label>
+                    <TimeField
+                      value={state.timeValue}
+                      onChange={(newValue) => {
+                        if (newValue) {
+                          state.setTimeValue(newValue as any);
+                        }
+                      }}
+                      aria-label="Time"
+                      granularity="minute"
+                      hideTimeZone
+                      hourCycle={24}
+                      name="time"
+                      shouldForceLeadingZeros
+                    >
+                      <TimeField.Group variant="secondary">
+                        <TimeField.Input>
+                          {(segment) => <TimeField.Segment segment={segment} />}
+                        </TimeField.Input>
+                      </TimeField.Group>
+                    </TimeField>
+                  </div>
+                </DatePicker.Popover>
+              </>
+            )}
+          </DatePicker>
         </div>
         <button
           type="submit"
