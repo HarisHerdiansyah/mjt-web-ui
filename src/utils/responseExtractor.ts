@@ -1,23 +1,23 @@
 import type {
-  DetailPerjalanan,
-  JadwalKedatangan,
+  TripDetails,
+  ArrivalSchedules,
   ExtractedSchedule,
   TrafficInfo,
   RainInfo,
 } from "@/types/types";
 
 const TRAFFIC_JAM_LEVEL = {
-  LANCAR: "Lancar",
-  RAMAI_LANCAR: "Ramai Lancar",
-  MACET: "Macet",
-  MACET_PARAH: "Macet Parah",
+  LANCAR: "Smooth",
+  RAMAI_LANCAR: "Moderate Traffic",
+  MACET: "Congested",
+  MACET_PARAH: "Severe Congestion",
 } as const;
 
 const WEATHER_LEVEL = {
-  CERAH: "Cerah / Berawan",
-  RINGAN: "Hujan Ringan",
-  SEDANG: "Hujan Sedang",
-  LEBAT: "Hujan Lebat",
+  CERAH: "Clear / Cloudy",
+  RINGAN: "Light Rain",
+  SEDANG: "Moderate Rain",
+  LEBAT: "Heavy Rain",
 } as const;
 
 function isTrafficJam(stmt: string): boolean {
@@ -26,19 +26,19 @@ function isTrafficJam(stmt: string): boolean {
   );
 }
 
-function extractTrafficInformation(details: DetailPerjalanan[]): TrafficInfo {
+function extractTrafficInformation(details: TripDetails[]): TrafficInfo {
   const info: TrafficInfo = { condition: false, spot: "", msg: "" };
 
   for (const detail of details) {
-    if (isTrafficJam(detail.tingkat_kemacetan)) {
+    if (isTrafficJam(detail.congestion_level)) {
       info.condition = true;
-      info.spot = detail.halte_asal;
-      info.msg = `Terdapat perkiraan kemacetan di titik ${detail.halte_asal}`;
+      info.spot = detail.origin_shelter;
+      info.msg = `There is traffic congestion expected at ${detail.origin_shelter}`;
       return info;
     }
   }
 
-  info.msg = "Kondisi lalu lintas diperkirakan lancar atau ramai lancar";
+  info.msg = "Traffic conditions are expected to be smooth or moderate";
   return info;
 }
 
@@ -49,34 +49,35 @@ function weatherLevel(stmt: string): number {
   return 0;
 }
 
-function weatherMsgBasedOnWeather(detail: DetailPerjalanan): string {
-  if (detail.kondisi_cuaca === WEATHER_LEVEL.RINGAN) {
-    return `Terdapat kemungkinan hujan ringan di titik ${detail.halte_asal}.`;
+function weatherMsgBasedOnWeather(detail: TripDetails): string {
+  if (detail.weather_condition === WEATHER_LEVEL.RINGAN) {
+    return `There is a chance of light rain at ${detail.origin_shelter}.`;
   }
   if (
-    detail.kondisi_cuaca === WEATHER_LEVEL.SEDANG ||
-    detail.kondisi_cuaca === WEATHER_LEVEL.LEBAT
+    detail.weather_condition === WEATHER_LEVEL.SEDANG ||
+    detail.weather_condition === WEATHER_LEVEL.LEBAT
   ) {
-    return `Kemungkinan hujan sedang hingga lebat dengan persentase ${detail.probabilitas_hujan_persen}% di titik ${detail.halte_asal}.`;
+    return `There is a chance of moderate to heavy rain with a percentage of ${detail.precipitation_probability_percent}% at ${detail.origin_shelter}.`;
   }
   return "";
 }
 
-function extractRainInformation(details: DetailPerjalanan[]): RainInfo {
+function extractRainInformation(details: TripDetails[]): RainInfo {
   const info: RainInfo = { condition: false, level: 0, pct: 0.0, msg: "" };
 
   for (const detail of details) {
-    const wL = weatherLevel(detail.kondisi_cuaca);
+    const wL = weatherLevel(detail.weather_condition);
     if (wL > 0) {
       info.condition = true;
       info.level = wL;
-      info.pct = detail.probabilitas_hujan_persen;
+      info.pct = detail.precipitation_probability_percent;
       info.msg = weatherMsgBasedOnWeather(detail);
       return info;
     }
   }
 
-  info.msg = "Cuaca cerah / berawan selama perjalanan.";
+  info.msg =
+    "Weather conditions are expected to be clear / cloudy during the trip";
   return info;
 }
 
@@ -93,19 +94,19 @@ function timeAtStartModifier(timeAtDepart: string) {
 }
 
 export default function responseExtractor(
-  data: JadwalKedatangan[],
+  data: ArrivalSchedules[],
 ): ExtractedSchedule[] {
   return data.map((d): ExtractedSchedule => {
-    const trafficJamInfo = extractTrafficInformation(d.detail_perjalanan);
-    const rainInfo = extractRainInformation(d.detail_perjalanan);
+    const trafficJamInfo = extractTrafficInformation(d.trip_details);
+    const rainInfo = extractRainInformation(d.trip_details);
 
     return {
-      policeNumber: d.nopol,
-      timeAtStart: timeAtStartModifier(d.waktu_berangkat_di_rute),
-      timeAtDepart: d.waktu_berangkat,
-      timeAtArrive: d.waktu_sampai,
-      originShelter: d.detail_perjalanan[0].halte_asal,
-      towardShelter: d.detail_perjalanan.at(-1)!.halte_tujuan,
+      policeNumber: d.license_plate,
+      timeAtStart: timeAtStartModifier(d.route_departure_time),
+      timeAtDepart: d.departure_time,
+      timeAtArrive: d.arrival_time,
+      originShelter: d.trip_details[0].origin_shelter,
+      towardShelter: d.trip_details.at(-1)!.destination_shelter,
       trafficJam: trafficJamInfo.condition,
       trafficJamSpot: trafficJamInfo.spot,
       trafficJamMsg: trafficJamInfo.msg,

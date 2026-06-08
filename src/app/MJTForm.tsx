@@ -2,6 +2,14 @@
 
 import type { Key } from "@heroui/react";
 import type { DateValue } from "@internationalized/date";
+import type {
+  RouteItem,
+  ShelterItem,
+  RawRouteEntry,
+  RawShelterEntry,
+  ShelterMap,
+  SchedulePayload,
+} from "@/types/types";
 import { FormEvent, useState } from "react";
 import { IoPaperPlane, IoBus } from "react-icons/io5";
 import {
@@ -18,6 +26,7 @@ import {
   getLocalTimeZone,
   now,
   CalendarDateTime,
+  Time,
 } from "@internationalized/date";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getRouteAndShelter, getSchedule } from "@/http/api";
@@ -30,7 +39,7 @@ export default function MJTForm() {
     queryKey: ["shelters"],
     queryFn: async () => {
       const responseData = await getRouteAndShelter();
-      const cleanData = Array.isArray(responseData)
+      const cleanData: RawRouteEntry[] = Array.isArray(responseData)
         ? responseData
         : responseData?.data || [];
 
@@ -38,21 +47,19 @@ export default function MJTForm() {
         throw new Error("Failed to fetch shelters");
       }
 
-      const routes = cleanData.map((res: any) => ({
-        id: res.id_rute,
-        name: res.arah_tujuan,
+      const routes: RouteItem[] = cleanData.map((res: RawRouteEntry) => ({
+        id: res.route_id,
+        name: res.destination_direction,
       }));
 
-      const shelters: any = {};
+      const shelters: ShelterMap = {};
 
-      cleanData.forEach((res: any) => {
-        shelters[res.id_rute] = res.halte.map((h: any) => {
-          return {
-            shelter: h.nama_shelter,
-            lat: h.latitude,
-            long: h.longitude,
-          };
-        });
+      cleanData.forEach((res: RawRouteEntry) => {
+        shelters[res.route_id] = res.shelters.map((h: RawShelterEntry) => ({
+          shelter: h.shelter_name,
+          lat: h.latitude,
+          long: h.longitude,
+        }));
       });
 
       return { routes, shelters };
@@ -81,15 +88,15 @@ export default function MJTForm() {
   const [originInput, setOriginInput] = useState("");
   const [towardInput, setTowardInput] = useState("");
 
-  const allRoutes = data?.routes || [];
-  const shelterList = data?.shelters?.[routeId as string] || [];
-  const filteredRoutes = allRoutes.filter((r: any) =>
+  const allRoutes: RouteItem[] = data?.routes || [];
+  const shelterList: ShelterItem[] = data?.shelters?.[routeId as string] || [];
+  const filteredRoutes = allRoutes.filter((r: RouteItem) =>
     r.name.toLowerCase().includes(routeInput.toLowerCase()),
   );
-  const filteredOrigin = shelterList.filter((s: any) =>
+  const filteredOrigin = shelterList.filter((s: ShelterItem) =>
     s.shelter.toLowerCase().includes(originInput.toLowerCase()),
   );
-  const filteredToward = shelterList.filter((s: any) =>
+  const filteredToward = shelterList.filter((s: ShelterItem) =>
     s.shelter.toLowerCase().includes(towardInput.toLowerCase()),
   );
 
@@ -120,15 +127,16 @@ export default function MJTForm() {
     e.preventDefault();
 
     const targetDatetime = getPayloadString(dt);
-    const payload = {
-      prediksi: "sampai",
-      nama_shelter: routeShelters.origin,
-      halte_tujuan: routeShelters.toward,
+    console.log(targetDatetime);
+    const payload: SchedulePayload = {
+      prediction_mode: "destination",
+      shelter_name: routeShelters.origin as string | null,
+      destination_shelter: routeShelters.toward as string | null,
       target_datetime: targetDatetime,
     };
     mutate(payload, {
       onSuccess: (data) => {
-        const responseData = data.data[0].jadwal_kedatangan;
+        const responseData = data.data[0].arrival_schedules;
         const cleanData = responseExtractor(responseData);
         storeSchedules(cleanData);
         resetForm();
@@ -141,7 +149,7 @@ export default function MJTForm() {
       {(isFetching || isPending) && <Loader />}
       <form onSubmit={onSubmit} className="space-y-4">
         <div id="route-section" className="space-y-1.5">
-          <Label htmlFor="routes">Pilih Rute MJT</Label>
+          <Label htmlFor="routes">Choose Route:</Label>
           <div className="flex gap-2 items-center">
             <div className="w-9 h-9 shrink-0 rounded-md bg-blue-600 flex items-center justify-center">
               <IoPaperPlane className="text-white" size={24} />
@@ -158,7 +166,7 @@ export default function MJTForm() {
                 setRouteShelters({ origin: null, toward: null });
                 setOriginInput("");
                 setTowardInput("");
-                const selected = allRoutes.find((r: any) => r.id === key);
+                const selected = allRoutes.find((r: RouteItem) => r.id === key);
                 setRouteInput(selected?.name ?? "");
               }}
               items={filteredRoutes}
@@ -169,7 +177,7 @@ export default function MJTForm() {
               </ComboBox.InputGroup>
               <ComboBox.Popover>
                 <ListBox>
-                  {(r: any) => (
+                  {(r: RouteItem) => (
                     <ListBox.Item id={r.id} textValue={r.name}>
                       {r.name}
                       <ListBox.ItemIndicator />
@@ -181,7 +189,7 @@ export default function MJTForm() {
           </div>
         </div>
         <div id="origin-shelter-section" className="space-y-1.5">
-          <Label htmlFor="origin">Halte Awal</Label>
+          <Label htmlFor="origin">Origin Shelter:</Label>
           <div className="flex gap-2 items-center">
             <div className="w-9 h-9 shrink-0 rounded-md bg-white flex items-center justify-center">
               <IoBus className="text-blue-600" size={32} />
@@ -196,7 +204,7 @@ export default function MJTForm() {
               onSelectionChange={(key) => {
                 setRouteShelters((prev) => ({ ...prev, origin: key }));
                 const selected = shelterList.find(
-                  (s: any) => s.shelter.toLowerCase() === key,
+                  (s: ShelterItem) => s.shelter.toLowerCase() === key,
                 );
                 setOriginInput(selected?.shelter ?? "");
               }}
@@ -208,7 +216,7 @@ export default function MJTForm() {
               </ComboBox.InputGroup>
               <ComboBox.Popover>
                 <ListBox>
-                  {(s: any) => (
+                  {(s: ShelterItem) => (
                     <ListBox.Item
                       id={s.shelter.toLowerCase()}
                       textValue={s.shelter}
@@ -223,7 +231,7 @@ export default function MJTForm() {
           </div>
         </div>
         <div id="toward-shelter-section" className="space-y-1.5">
-          <Label htmlFor="toward">Halte Tujuan</Label>
+          <Label htmlFor="toward">Destination Shelter:</Label>
           <div className="flex gap-2 items-center">
             <div className="w-9 h-9 shrink-0 rounded-md bg-white flex items-center justify-center">
               <IoBus className="text-blue-600" size={32} />
@@ -238,7 +246,7 @@ export default function MJTForm() {
               onSelectionChange={(key) => {
                 setRouteShelters((prev) => ({ ...prev, toward: key }));
                 const selected = shelterList.find(
-                  (s: any) => s.shelter.toLowerCase() === key,
+                  (s: ShelterItem) => s.shelter.toLowerCase() === key,
                 );
                 setTowardInput(selected?.shelter ?? "");
               }}
@@ -250,7 +258,7 @@ export default function MJTForm() {
               </ComboBox.InputGroup>
               <ComboBox.Popover>
                 <ListBox>
-                  {(s: any) => (
+                  {(s: ShelterItem) => (
                     <ListBox.Item
                       id={s.shelter.toLowerCase()}
                       textValue={s.shelter}
@@ -265,7 +273,7 @@ export default function MJTForm() {
           </div>
         </div>
         <div id="date-section" className="flex flex-col gap-1.5">
-          <Label htmlFor="dateAndTime">Jadwal</Label>
+          <Label htmlFor="dateAndTime">Schedule:</Label>
           <DatePicker
             id="dateAndTime"
             hourCycle={24}
@@ -316,12 +324,12 @@ export default function MJTForm() {
                     </Calendar.YearPickerGrid>
                   </Calendar>
                   <div className="flex items-center justify-between">
-                    <Label>Waktu di tujuan:</Label>
+                    <Label>Time at location:</Label>
                     <TimeField
                       value={state.timeValue}
                       onChange={(newValue) => {
                         if (newValue) {
-                          state.setTimeValue(newValue as any);
+                          state.setTimeValue(newValue as Time);
                         }
                       }}
                       aria-label="Time"
@@ -347,7 +355,7 @@ export default function MJTForm() {
           type="submit"
           className="w-full rounded-full bg-blue-600 py-2 text-white mt-6 hover:cursor-pointer hover:bg-blue-500"
         >
-          Periksa Waktu
+          Check
         </button>
       </form>
     </section>

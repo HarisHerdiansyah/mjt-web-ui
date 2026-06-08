@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { SchedulePayload } from "@/types/types";
 
 // const BASE_URL = "http://139.59.249.159:8000/api";
 // const api = axios.create({
@@ -19,7 +20,7 @@ export async function getRouteAndShelter() {
   }
 }
 
-export async function getSchedule(payload: any) {
+export async function getSchedule(payload: SchedulePayload) {
   try {
     const response = await axios.post("/api/schedule", payload);
     if (response.status !== 200) {

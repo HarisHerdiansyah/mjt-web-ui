@@ -46,19 +46,19 @@ export default function TripCard() {
     >
       <div className="flex gap-1 items-center mb-2">
         <IoMdCheckmarkCircle className="text-white" size={20} />
-        <p className="text-white">Data Jadwal {i + 1}</p>
+        <p className="text-white">Schedule {i + 1}</p>
       </div>
       <div className="w-full bg-white rounded-xl p-5 space-y-4">
         <div className="grid grid-cols-2 gap-6">
           <div className="flex flex-col gap-1">
-            <p>Halte Awal</p>
+            <p className="text-sm">Origin:</p>
             <div className="flex items-center gap-2">
               <IoBus className="text-blue-600" size={32} />
               <p className="text-sm">{sch.originShelter}</p>
             </div>
           </div>
           <div className="flex flex-col gap-1">
-            <p>Waktu Berangkat</p>
+            <p className="text-sm">Departure Time:</p>
             <div className="flex items-center gap-3">
               <FaRegClock className="text-blue-600" size={32} />
               <p className="border-b border-blue-600 w-full">
@@ -69,14 +69,14 @@ export default function TripCard() {
         </div>
         <div className="grid grid-cols-2 gap-6">
           <div className="flex flex-col gap-1">
-            <p>Halte Tujuan</p>
+            <p className="text-sm">Destination:</p>
             <div className="flex items-center gap-2">
               <IoBus className="text-blue-600" size={32} />
               <p className="text-sm">{sch.towardShelter}</p>
             </div>
           </div>
           <div className="flex flex-col gap-1">
-            <p>Waktu Sampai</p>
+            <p className="text-sm">Arrival Time:</p>
             <div className="flex items-center gap-3">
               <FaRegClock className="text-blue-600" size={32} />
               <p className="border-b border-blue-600 w-full">
@@ -89,7 +89,7 @@ export default function TripCard() {
           <FaPersonShelter className="text-blue-600" size={32} />
           <div className="flex flex-col w-full">
             <span className="text-sm">
-              Saran berada di Halte Awal paling lambat pada:
+              Please be at the starting point no later than:
             </span>
             <p className="border-b border-blue-600 w-full font-semibold">
               {sch.timeAtStart}

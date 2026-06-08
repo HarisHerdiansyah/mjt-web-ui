@@ -1,54 +1,55 @@
 // ─── Raw API Response Types ───────────────────────────────────────────────────
 
-export interface DetailPerjalanan {
-  halte_asal: string;
-  halte_tujuan: string;
-  waktu_ngetem_detik: number;
-  waktu_tempuh_detik: number;
-  kecepatan_rata_rata_kmh: number;
-  tingkat_kemacetan: string;
-  kondisi_cuaca: string;
-  curah_hujan_mm: number;
-  probabilitas_hujan_persen: number;
+export interface TripDetails {
+  origin_shelter: string;
+  destination_shelter: string;
+  dwell_time_seconds: number;
+  travel_time_seconds: number;
+  average_speed_kmh: number;
+  congestion_level: string;
+  weather_condition: string;
+  precipitation_mm: number;
+  precipitation_probability_percent: number;
 }
 
-export interface JadwalKedatangan {
-  nopol: string;
-  tipe_prediksi: string;
-  waktu_berangkat_di_rute: string;
-  cuaca_awal_rute: string;
-  waktu_berangkat: string;
-  cuaca_saat_berangkat: string;
-  curah_hujan_berangkat_mm: number;
-  probabilitas_hujan_berangkat: number;
-  sisa_waktu_detik: number;
-  waktu_sampai: string;
-  cuaca_saat_sampai: string;
-  curah_hujan_sampai_mm: number;
-  probabilitas_hujan_sampai: number;
-  durasi_perjalanan_detik: number;
-  detail_perjalanan: DetailPerjalanan[];
+export interface ArrivalSchedules {
+  license_plate: string;
+  prediction_type: string;
+  route_departure_time: string;
+  initial_route_weather: string;
+  suggested_time_at_shelter: string;
+  departure_time: string;
+  departure_weather: string;
+  departure_precipitation_mm: number;
+  departure_precipitation_probability: number;
+  remaining_time_seconds: number;
+  arrival_time: string;
+  arrival_weather: string;
+  arrival_precipitation_mm: number;
+  arrival_precipitation_probability: number;
+  total_travel_duration_seconds: number;
+  trip_details: TripDetails[];
 }
 
-export interface InformasiOperasional {
-  nama_hari: string;
-  hari_ke: number;
+export interface OperationalInfo {
+  day_name: string;
+  day_of_week: number;
   is_holiday: boolean;
-  jam_mulai_operasi: string;
-  jam_akhir_operasi: string;
-  total_armada_aktif: number;
-  keterangan: string;
+  operation_start_time: string;
+  operation_end_time: string;
+  total_active_fleets: number;
+  remarks: string;
 }
 
-export interface KoridorResponse {
-  koridor: string;
-  arah_tujuan: string;
-  informasi_operasional: InformasiOperasional;
-  jadwal_kedatangan: JadwalKedatangan[];
+export interface CorridorResponse {
+  corridor: string;
+  destination_direction: string;
+  operational_info: OperationalInfo;
+  arrival_schedules: ArrivalSchedules[];
 }
 
-/** Root type — the API returns an array of KoridorResponse */
-export type ApiResponse = KoridorResponse[];
+/** Root type — the API returns an array of CorridorResponse */
+export type ApiResponse = CorridorResponse[];
 
 // ─── Extracted / Mapped Types ─────────────────────────────────────────────────
 
@@ -79,4 +80,46 @@ export interface ExtractedSchedule {
   rainLevel: number;
   rainPct: number;
   weatherMsg: string;
+}
+
+// ─── Route & Shelter API Types ────────────────────────────────────────────────
+
+export interface ShelterItem {
+  shelter: string;
+  lat: number;
+  long: number;
+}
+
+export interface RouteItem {
+  id: string;
+  name: string;
+}
+
+export interface RawShelterEntry {
+  sequence: number;
+  shelter_name: string;
+  latitude: number;
+  longitude: number;
+}
+
+export interface RawRouteEntry {
+  route_id: string;
+  destination_direction: string;
+  shelters: RawShelterEntry[];
+}
+
+export type ShelterMap = Record<string, ShelterItem[]>;
+
+export interface RouteAndShelterData {
+  routes: RouteItem[];
+  shelters: ShelterMap;
+}
+
+// ─── Schedule Payload ─────────────────────────────────────────────────────────
+
+export interface SchedulePayload {
+  prediction_mode: string;
+  shelter_name: string | null;
+  destination_shelter: string | null;
+  target_datetime: string;
 }
