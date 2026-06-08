@@ -80,6 +80,18 @@ function extractRainInformation(details: DetailPerjalanan[]): RainInfo {
   return info;
 }
 
+function timeAtStartModifier(timeAtDepart: string) {
+  const [hours, minutes, seconds] = timeAtDepart.split(":").map(Number);
+  const dateObj = new Date();
+  dateObj.setHours(hours, minutes, seconds, 0);
+
+  dateObj.setMinutes(dateObj.getMinutes() - 15);
+  const finalHours = String(dateObj.getHours()).padStart(2, "0");
+  const finalMinutes = String(dateObj.getMinutes()).padStart(2, "0");
+  const finalSeconds = String(dateObj.getSeconds()).padStart(2, "0");
+  return `${finalHours}:${finalMinutes}:${finalSeconds}`;
+}
+
 export default function responseExtractor(
   data: JadwalKedatangan[],
 ): ExtractedSchedule[] {
@@ -89,7 +101,7 @@ export default function responseExtractor(
 
     return {
       policeNumber: d.nopol,
-      timeAtStart: d.waktu_berangkat_di_rute,
+      timeAtStart: timeAtStartModifier(d.waktu_berangkat_di_rute),
       timeAtDepart: d.waktu_berangkat,
       timeAtArrive: d.waktu_sampai,
       originShelter: d.detail_perjalanan[0].halte_asal,

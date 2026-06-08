@@ -9,7 +9,7 @@ const queryClient = new QueryClient();
 export default function AppContent() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="p-6 overflow-hidden space-y-6 min-h-screen">
+      <div className="p-6 space-y-6 min-h-screen">
         <MJTForm />
         <TripCard />
       </div>

@@ -14,7 +14,11 @@ import {
   DatePicker,
   TimeField,
 } from "@heroui/react";
-import { getLocalTimeZone, now } from "@internationalized/date";
+import {
+  getLocalTimeZone,
+  now,
+  CalendarDateTime,
+} from "@internationalized/date";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getRouteAndShelter, getSchedule } from "@/http/api";
 import { useSchedule } from "@/utils/store";
@@ -71,25 +75,44 @@ export default function MJTForm() {
     origin: null,
     toward: null,
   });
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [datetime, setDatetime] = useState<DateValue | null>(
-    now(getLocalTimeZone()),
-  );
+  const [dt, setDt] = useState<DateValue | null>(now(getLocalTimeZone()));
+
+  const getPayloadString = (dateObj: DateValue | null) => {
+    if (!dateObj) return "";
+    const obj = dateObj as CalendarDateTime;
+
+    const year = obj.year;
+    const month = String(obj.month).padStart(2, "0");
+    const day = String(obj.day).padStart(2, "0");
+    const hour = String(obj.hour || 0).padStart(2, "0");
+    const minute = String(obj.minute || 0).padStart(2, "0");
+    const second = String(obj.second || 0).padStart(2, "0");
+
+    return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+  };
+
+  const resetForm = () => {
+    setRouteId(null);
+    setRouteShelters({ origin: null, toward: null });
+    setDt(now(getLocalTimeZone()));
+  };
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const targetDatetime = getPayloadString(dt);
     const payload = {
-      prediksi: "kedatangan",
+      prediksi: "sampai",
       nama_shelter: routeShelters.origin,
       halte_tujuan: routeShelters.toward,
-      target_datetime: `${date} ${time}:00`,
+      target_datetime: targetDatetime,
     };
     mutate(payload, {
       onSuccess: (data) => {
         const responseData = data.data[0].jadwal_kedatangan;
         const cleanData = responseExtractor(responseData);
         storeSchedules(cleanData);
+        resetForm();
       },
     });
   };
@@ -188,7 +211,7 @@ export default function MJTForm() {
               onSelectionChange={(key) =>
                 setRouteShelters((prev) => ({
                   ...prev,
-                  origin: key,
+                  toward: key,
                 }))
               }
               items={data?.shelters[routeId as string] || []}
@@ -222,8 +245,8 @@ export default function MJTForm() {
             granularity="minute"
             shouldForceLeadingZeros
             shouldCloseOnSelect={false}
-            value={datetime}
-            onChange={setDatetime}
+            value={dt}
+            onChange={setDt}
             hideTimeZone
           >
             {({ state }) => (
